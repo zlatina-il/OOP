@@ -1,0 +1,166 @@
+/*
+Define abstract class Human with first name and last name. Define new class Student which is derived from Human and has new field – grade.
+Define class Worker derived from Human with new property WeekSalary and WorkHoursPerDay and method MoneyPerHour() that returns 
+money earned by hour by the worker. Define the proper constructors and properties for this hierarchy. Initialize a list of 10 students 
+and sort them by grade in ascending order (use LINQ or OrderBy() extension method). Initialize a list of 10 workers and sort them by 
+money per hour in descending order. Merge the lists and sort them by first name and last name.
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace People
+{
+    public abstract class Human
+    {
+        private string firstName;
+        private string lastName;
+
+        public string FirstName
+        {
+            get { return this.firstName; }
+            set { this.firstName = value; }
+        }
+
+        public string LastName
+        {
+            get { return this.lastName; }
+            set { this.lastName = value; }
+        }
+    }
+    
+    public class Student: Human
+    {
+        private int grade;
+        public Student(string firstName, string lastName, int grade)
+        {
+            this.FirstName = firstName;
+            this.LastName = lastName;
+            this.grade = grade;
+        }
+        public int Grade
+        {
+            get { return this.grade; }
+            set { this.grade = value; }
+        }
+    }
+    
+    public class Worker:Human
+    {
+        private int weekSalary;
+        private int workHoursPerDay;
+
+        public Worker(string firstName, string lastName, int weekSalary, int workHoursPerDay)
+        {
+            this.FirstName = firstName;
+            this.LastName = lastName;
+            this.weekSalary = weekSalary;
+            this.workHoursPerDay = workHoursPerDay;
+        }
+
+        public int WeekSalary
+        {
+            get { return this.weekSalary; }
+            set { this.weekSalary=value;}
+        }
+
+        public int WorkHoursPerDay
+        {
+            get { return this.workHoursPerDay; }
+            set { this.workHoursPerDay = value; }
+        }
+
+        public double MoneyPerHour()
+        {
+            return WeekSalary / (WorkHoursPerDay * 5.0);
+        }
+    }
+    
+    class Program
+    {
+        static void Main()
+        {
+            List<Student> students = new List<Student>()
+            { 
+              new Student( "Zlatina","Ilieva", 12 ),
+              new Student( "Plamen","Dimitrov", 2 ),
+              new Student( "Kristian","Pavlov", 9 ),
+              new Student( "Krum","Dobrev", 6 ),
+              new Student( "Lubomira","Kacarova", 1 ),
+              new Student( "Gergana","Kacarska", 3 ),
+              new Student( "Valentina","Velkova", 10 ),
+              new Student( "Teodora","Teneva", 5 ),
+              new Student( "Stoqn","Nedqlkov", 7 ),
+              new Student( "Nikol","ilieva", 8 )
+            };
+
+            Console.WriteLine("Print students from the list:");
+            Console.WriteLine("----------------------------------------");
+            foreach (var student in students)
+            {
+                Console.WriteLine("{0} {1} -- {2} grade", student.FirstName, student.LastName, student.Grade);
+            }
+
+            students = students.OrderBy(student => student.Grade).ToList();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Print students sorted by grade:");
+            Console.WriteLine("----------------------------------------");
+            foreach (var student in students)
+            {
+                Console.WriteLine("{0} {1} -- {2} grade", student.FirstName, student.LastName, student.Grade);
+            }
+
+            List<Worker> workers = new List<Worker>()
+            { 
+              new Worker( "Krasimir","Lambov", 700, 8 ),
+              new Worker( "Vladimir","Yurukov", 200, 8 ),
+              new Worker( "Anita","Lilova", 150, 8 ),
+              new Worker( "Radoslav","Petrov", 500, 10 ),
+              new Worker( "Radoslava","Sokolova", 80, 10 ),
+              new Worker( "Petq","Dimitrova", 50, 6 ),
+              new Worker( "Kalina","Mileva", 70, 7 ),
+              new Worker( "Teodor","Ivanov", 45, 4 ),
+              new Worker( "Venelin","Dimov", 25, 8 ),
+              new Worker( "Nikolai","Daskalov", 135, 12 )
+            };
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Print list of workers with week salary and work hours per day:");
+            Console.WriteLine("---------------------------------------------------------------");
+            foreach (var worker in workers)
+            {
+                Console.WriteLine("{0} {1} -- {2} money per hour", worker.FirstName, worker.LastName, worker.MoneyPerHour());
+            }
+            Console.WriteLine();
+            Console.WriteLine();
+            workers = workers.OrderByDescending(worker => worker.MoneyPerHour()).ToList();
+
+            Console.WriteLine("Print sorted list of workers ordered by money per hour: ");
+            Console.WriteLine("--------------------------------------------------------");
+            foreach (var worker in workers)
+            {
+                Console.WriteLine("{0} {1} -- {2} money per hour", worker.FirstName, worker.LastName, worker.MoneyPerHour());
+            }
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Merged and sorted the lists of students and workers:");
+            Console.WriteLine("-----------------------------------------------------");
+            List<dynamic> merge = new List<dynamic>(students.Concat<dynamic>(workers));
+
+            var merged =
+                from element in merge
+                orderby element.FirstName, element.LastName
+                select element;
+
+            foreach (var people in merged)
+            {
+                Console.Write(people.FirstName);
+                Console.WriteLine(" " + people.LastName);
+            }
+        }
+    }
+}
