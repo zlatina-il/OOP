@@ -1,0 +1,252 @@
+/*
+We are given a school. In the school there are classes of students. Each class has a set of teachers. Each teacher teaches a set of 
+disciplines. Students have name and unique class number. Classes have unique text identifier. Teachers have name. Disciplines have name, 
+number of lectures and number of exercises. Both teachers and students are people. Students, classes, teachers and disciplines could have 
+optional comments (free text block). Your task is to identify the classes (in terms of  OOP) and their attributes and operations, 
+encapsulate their fields, define the class hierarchy and create a class diagram with Visual Studio.
+*/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace School
+{
+    class ClassOfStudents
+    {
+        List<Students> students;
+        List<Teachers> teachers;
+        public List<string> comments;
+        public string classID;
+
+        public ClassOfStudents(Students[] students, Teachers[] teachers, string classID)
+        {
+            this.students = new List<Students>(students);
+            this.teachers = new List<Teachers>(teachers);
+            this.classID = classID;
+            this.comments = new List<string>();
+        }
+
+        public Students[] Students
+        {
+            get { return this.students.ToArray(); }
+            private set { }
+        }
+
+        public Teachers[] Teachers
+        {
+            get { return this.teachers.ToArray(); }
+            private set { }
+        }
+
+        public string ClassID
+        {
+            get { return this.classID; }
+            set { this.classID = value; }
+        }
+
+        public string[] Comments
+        {
+            get { return this.comments.ToArray(); }
+        }
+
+        public void AddComment(string comment)
+        {
+            this.comments.Add(comment);
+        }
+    }
+    
+    class Disciplines: ICommentable
+    {
+        private string nameOfDisciplines;
+        private byte numberOfLectures;
+        private byte numberOfExercises;
+        private List<string> comments;
+
+        public Disciplines(string nameOfDisciplines, byte numberOfLectures, byte numberOfExercises)
+        {
+            this.nameOfDisciplines = nameOfDisciplines;
+            this.numberOfLectures = numberOfLectures;
+            this.numberOfExercises = numberOfExercises;
+            this.comments = new List<string>();
+        }
+
+        public string NameOfDisciplines
+        {
+            get { return this.nameOfDisciplines; }
+            set { this.nameOfDisciplines = value; }
+        }
+
+        public byte NumberOfLectures
+        {
+            get { return this.numberOfLectures; }
+            set { this.numberOfLectures = value; }
+        }
+
+        public byte NumberOfExercises
+        {
+            get { return this.numberOfExercises; }
+            set { this.numberOfExercises = value; }
+        }
+
+        public string[] Comments
+        {
+            get { return this.comments.ToArray(); }
+        }
+
+        public void AddComment(string comment)
+        {
+            this.comments.Add(comment);
+        }
+    }
+    
+    interface ICommentable
+    {
+        string [] Comments {get;}
+        void AddComment(string comment);
+    }
+    
+    public class People
+    {
+        public string name;
+
+        public People(string name)
+        {
+        this.name = name;
+        }
+
+        public string Name
+        {
+            get { return this.name; }
+            set { this.name = value; }
+        }
+    }
+    
+    class School
+    {
+        private List<ClassOfStudents> classes;
+
+        public School(ClassOfStudents[] classes)
+        {
+            this.classes = new List<ClassOfStudents>(classes);
+        }
+
+        public ClassOfStudents[] Classes
+        {
+            get { return this.classes.ToArray(); }
+            private set { }
+        }
+
+    }
+    
+    class Students:People, ICommentable
+    {
+        private byte studentNumber;
+        private List<string> comments;
+
+        public Students(string name, byte studentNumber):base(name)
+        {
+            this.studentNumber = studentNumber;
+            this.comments = new List<string>();
+        }
+
+        public byte StudentNumber
+        {
+            get { return this.studentNumber; }
+            set { this.studentNumber = value; }
+        }
+
+        public string[] Comments
+        {
+            get { return this.comments.ToArray(); }
+        }
+
+        public void AddComment(string comment)
+        {
+            this.comments.Add(comment);
+        }
+    }
+    
+    class Teachers:People, ICommentable
+    {
+        public List<Disciplines> disciplines;
+        public List<string> comments;
+
+        public Teachers(string name, Disciplines[] disciplines): base(name)
+        {
+            this.disciplines=new List<Disciplines>(disciplines);
+            this.comments = new List<string>();
+        }
+
+        public Disciplines[] Discplines 
+        {
+            get { return this.disciplines.ToArray(); }
+            private set { } 
+        }
+
+        public string [] Comments 
+        {
+            get { return this.comments.ToArray(); }
+        }
+
+        public void AddComment(string comment)
+        {
+            this.comments.Add(comment);
+        }
+    }
+    
+    class Program
+    {
+        static void Main()
+        {
+            Students stud1 = new Students("Zlatina Ilieva", 1);
+            stud1.AddComment("This is something which must be a comment for testing this function:)))");
+            Console.Write("Comment: {0}", stud1.Comments[0]);
+            Students stud2 = new Students("Plamen Dimitrov", 4);
+            Students[] students = new Students[] { stud1, stud2 };
+            foreach (var s in students)
+            {
+                Console.WriteLine("Name: {0} ID:{1}",s.name, s.StudentNumber);
+            }
+            Console.WriteLine("--------------");
+            Disciplines disp1 = new Disciplines("C#-1", 20, 40);
+            Disciplines disp2 = new Disciplines("C#-2", 10, 40);
+            Disciplines[] disp = new Disciplines[] { disp1, disp2 };
+            foreach (var d in disp)
+            {
+                Console.WriteLine("Name: {0} Lectures: {1} Exercises: {2}", d.NameOfDisciplines, d.NumberOfLectures, d.NumberOfExercises);
+            }
+            Console.WriteLine("--------------");
+
+            //Disciplines[] = new Disciplines[
+            Teachers teach1 = new Teachers("Nikolai Kostov", disp);
+            Teachers teach2 = new Teachers("Svetlin Nakov", disp);
+            Teachers[] teachers = new Teachers[] { teach1, teach2 };
+            foreach (var t in teachers)
+            {
+                Console.WriteLine("Teacher: {0} Discipline: {1}", t.name, t.Discplines[0].NameOfDisciplines);
+            }
+            Console.WriteLine("--------------");
+            Console.WriteLine();
+            Console.WriteLine();
+            ClassOfStudents class1 = new ClassOfStudents(students, teachers, "12A");
+            var selected_s =
+                from s in class1.Students 
+                where class1.classID=="12A"
+                select s.Name;
+            var selected_t =
+                from s in class1.Teachers
+                where class1.classID == "12A"
+                select s.Name;
+            Console.WriteLine("The teacher in {0} are: ", class1.classID);
+            Console.WriteLine("--------------");
+            foreach (var v in selected_t.Distinct()) Console.WriteLine(v);
+            Console.WriteLine("--------------");
+            Console.WriteLine("The students in {0} are: ", class1.classID);
+            Console.WriteLine("--------------");
+            foreach (var v in selected_s.Distinct()) Console.WriteLine(v);
+
+        }
+    }
+}
