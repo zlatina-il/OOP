@@ -1,0 +1,283 @@
+/*
+A bank holds different types of accounts for its customers: deposit accounts, loan accounts and mortgage accounts. Customers could be 
+individuals or companies. All accounts have customer, balance and interest rate (monthly based). Deposit accounts are allowed to deposit 
+and with draw money. Loan and mortgage accounts can only deposit money. All accounts can calculate their interest amount for a given 
+period (in months). In the common case its is calculated as follows: number_of_months * interest_rate.
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Bank
+{
+    public abstract class Account
+    {
+        //fields
+        private Customer customer;
+        private decimal balance;
+        private decimal interest;
+
+        //constructor
+        public Account(Customer customer, decimal balance, decimal interest)
+        {
+            this.customer = customer;
+            this.balance = balance;
+            this.interest = interest;
+        }
+
+        //properties
+        public Customer Customer
+        {
+            get { return this.customer; }
+            set { this.customer = value; }
+        }
+
+        public decimal Balance
+        {
+            get { return this.balance; }
+            set { this.balance = value; }
+        }
+
+        public decimal Interest
+        {
+            get { return this.interest; }
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("The interest must be positive number!");
+                }
+                this.interest = value;
+            }
+        }
+
+        //methods
+        public virtual decimal InterestForPeriod(uint months)
+        {
+            return (this.Balance * this.Interest) * months;
+        }
+    }
+    
+    public class Company: Customer
+    {
+        public Company(string name) : base(name)
+        { 
+        }
+    }
+    
+    public abstract class Customer
+    {
+        //fields
+        private string name;
+
+        //constructor
+        public Customer(string name)
+        {
+            this.Name = name;
+        }
+
+        //properties
+        public string Name
+        {
+            get { return this.name; }
+            set { this.name = value; }
+        }
+    }
+    
+    public interface IDepositable
+    {
+        void AddDeposit(decimal deposit);
+    }
+    
+    public interface IDrawable
+    {
+        void Draw(decimal draw);
+    }
+    
+    public class Deposit : Account, IDepositable, IDrawable
+    {
+        //constructor
+        public Deposit(Customer customer, decimal balance, decimal interest)
+            : base(customer, balance, interest)
+        {
+        }
+
+        //methods
+        public void AddDeposit(decimal deposit)
+        {
+            if (deposit < 0)
+            {
+                throw new ArgumentOutOfRangeException("Enter positive number!");
+            }
+            else
+            {
+                this.Balance = this.Balance + deposit;
+            }
+        }
+
+        public void Draw(decimal draw)
+        {
+            if (draw < 0)
+            {
+                throw new ArgumentOutOfRangeException("Enter positive number!");
+            }
+            else
+            {
+                this.Balance = this.Balance - draw;
+            }
+        }
+
+        public override decimal InterestForPeriod(uint months)
+        {
+            return (this.Balance * this.Interest) * months;
+        }
+    }
+    
+    public class Individual : Customer
+    {
+        public Individual(string name): base(name)
+        {
+        }
+    }
+    
+    public class Loan : Account, IDepositable
+    {
+        //constructor
+        public Loan(Customer customer, decimal balance, decimal interest)
+            : base(customer, balance, interest)
+        { 
+        }
+
+        //methods
+        public void AddDeposit(decimal deposit)
+        {
+            if (deposit < 0)
+            {
+                throw new ArgumentOutOfRangeException("Enter positive number!");
+            }
+            else
+            {
+                this.Balance = this.Balance + deposit;
+            }
+        }
+
+        public override decimal InterestForPeriod(uint months)
+        {
+            if (this.Customer.GetType().ToString() == "Individual")
+            {
+                if (months <= 3)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (this.Balance * this.Interest) * (months - 3);
+                }
+            }
+            else
+            {
+                if (months <= 2)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (this.Balance * this.Interest) * (months - 2);
+                }
+            }
+        }
+    }
+    
+    public class Mortgage : Account, IDepositable
+    {
+        //constructor
+        public Mortgage(Customer customer, decimal balance, decimal interest)
+            : base(customer, balance, interest)
+        { 
+        }
+
+        //methods
+        public void AddDeposit(decimal deposit)
+        {
+            if (deposit < 0)
+            {
+                throw new ArgumentOutOfRangeException("Enter positive number!");
+            }
+            else
+            {
+                this.Balance = this.Balance + deposit;
+            }
+        }
+
+        public override decimal InterestForPeriod(uint months)
+        {
+            if (this.Customer.GetType().ToString() == "Individual")
+            {
+                if (months <= 6)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (this.Balance * this.Interest) * (months - 6);
+                }
+            }
+            else
+            {
+                if (months <= 12)
+                {
+                    return (this.Balance * (this.Interest / 2)) * (months);
+                }
+                else
+                {
+                    return (this.Balance * (this.Interest / 2)) * (months) + (this.Balance * this.Interest) * (months - 12);
+                }
+            }
+        }
+    }
+    
+    class Program
+    {
+        static void Main()
+        {
+  
+        Company company = new Company("PMG");
+        Individual human = new Individual("Zlatina Ilieva");
+
+        
+        Deposit humanDep = new Deposit(human, 200m, 0.02m);
+        Deposit companyDep = new Deposit(company, 2000m, 0.2m);
+
+        Loan humanLoan = new Loan(human, 200m, 0.02m);
+        Loan companyLoan = new Loan(company, 2000m, 0.2m);
+
+        Mortgage humanMortgage = new Mortgage(human, 200m, 0.02m);
+        Mortgage companyMortgage = new Mortgage(company, 2000m, 0.2m);
+
+        humanDep.Draw(100m);
+        Console.WriteLine("The deposit of {0} after draw is: {1} leva",human.Name, humanDep.Balance);
+        humanDep.AddDeposit(50);
+        Console.WriteLine("The deposit of {0} after add is: {1} leva",human.Name, humanDep.Balance);
+
+        Console.WriteLine("The deposit of {0} have interest for next 6 months: {1} "
+            , humanDep.Customer.Name, humanDep.InterestForPeriod(6));
+        Console.WriteLine("The loan of {0} have interest for next 6 months: {1} "
+            , humanLoan.Customer.Name, humanLoan.InterestForPeriod(6));
+        Console.WriteLine("The mortgage of {0} have interest for next 2 years: {1} "
+            , humanMortgage.Customer.Name, humanMortgage.InterestForPeriod(24));
+        Console.WriteLine();
+        Console.WriteLine();
+            Console.WriteLine("The deposit of {0} have interest for next 6 months: {1} "
+        , companyDep.Customer.Name, companyDep.InterestForPeriod(6));
+        Console.WriteLine("The loan of {0} have interest for next 6 months: {1} "
+            , companyLoan.Customer.Name, companyLoan.InterestForPeriod(6));
+        Console.WriteLine("The mortgage of {0} have interest for next 2 years: {1} "
+            , companyMortgage.Customer.Name, companyMortgage.InterestForPeriod(24));
+
+        }
+    }
+    
+}
